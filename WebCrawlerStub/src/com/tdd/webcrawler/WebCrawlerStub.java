@@ -5,6 +5,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * WebCrawlerStub is meant as a **starter** code for building a web crawler. It needs to be
@@ -14,7 +19,8 @@ import java.net.URL;
  * <p>Note that the content contains all the gory details of html tags. If you want to just get the
  * text content, you need to parse html and strip the tags.
  */
-public class WebCrawlerStub {
+public class WebCrawlerStub implements WebCrawler {
+  @Override
   public String retrieve(final String link) {
     URL url;
     InputStream is = null;
@@ -24,11 +30,11 @@ public class WebCrawlerStub {
     try {
       url = new URL(link);
       is = url.openStream(); // throws an IOException
-      br = new BufferedReader(new InputStreamReader(is));
+      br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
 
       String line;
       while ((line = br.readLine()) != null) {
-        System.out.println(line);
+        // System.out.println(line);
         content.append(line);
       }
     } catch (IOException ex) {
@@ -42,5 +48,29 @@ public class WebCrawlerStub {
     }
 
     return content.toString();
+  }
+
+  @Override
+  public List<Anchor> parseAnchors(String content) {
+    final Pattern pattern = this.getAnchorPattern();
+    final Matcher matcher = pattern.matcher(content);
+    List<Anchor> anchors = new ArrayList<>();
+    while (matcher.find()) {
+      anchors.add(new Anchor(matcher.group(2), matcher.group(3)));
+    }
+    return anchors;
+  }
+
+  @Override
+  public SiteMap<Anchor> buildSiteTree(String link) {
+    final SiteMap<Anchor> root = new SiteMap<>();
+    final String content = this.retrieve(link);
+    final List<Anchor> anchors = this.parseAnchors(content);
+
+    for (Anchor it : anchors) {
+      root.put(it.href(), buildSiteTree(it.href()));
+    }
+
+    return root;
   }
 }
