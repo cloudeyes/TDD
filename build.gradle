@@ -1,0 +1,39 @@
+allprojects {
+    group 'org.cloudeyes'
+    version '1.0-SNAPSHOT'
+}
+
+subprojects {
+    apply plugin: 'java'
+    sourceCompatibility = 1.8
+
+    repositories {
+        mavenCentral()
+    }
+
+    sourceSets {
+        main.java.srcDirs = ['src']
+        test.java.srcDirs = ['tst']
+    }
+
+    dependencies {
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.+'
+        testImplementation 'org.junit.jupiter:junit-jupiter-params:5.+'
+        testImplementation 'com.kncept.junit.reporter:junit-reporter:2.+'
+        testImplementation 'org.hamcrest:hamcrest-all:1.+'
+        testImplementation 'com.approvaltests:approvaltests:11.+'
+        testImplementation 'org.mockito:junit-jupiter:2.+'
+        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.+'
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+
+    // For Hangul Comments
+    compileJava.options.encoding = 'UTF-8'
+
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+    }
+}

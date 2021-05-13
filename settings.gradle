@@ -1,0 +1,6 @@
+rootProject.name = 'day2-practice'
+include 'JUnitSample'
+include 'TestMocking'
+include 'TestBDD'
+include 'Testability'
+include 'WebCrawlerStub'
