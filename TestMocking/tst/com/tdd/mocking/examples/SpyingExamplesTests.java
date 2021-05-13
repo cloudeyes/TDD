@@ -1,6 +1,7 @@
 package com.tdd.mocking.examples;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
 
 import com.amazonaws.services.sns.AmazonSNSClient;
 import com.tdd.mocking.PackageDepartEventPublisher;
@@ -61,6 +62,9 @@ public class SpyingExamplesTests {
     sut.publishEvent(packageDepartEvent);
 
     /** Add your spying here. */
+    final ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+    Mockito.verify(snsClientTestDouble).publish(anyString(), captor.capture(), anyString());
+    assertEquals("event message", captor.getValue());
   }
 }
 /**

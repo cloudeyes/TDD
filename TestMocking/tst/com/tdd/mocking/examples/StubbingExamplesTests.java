@@ -1,12 +1,18 @@
 package com.tdd.mocking.examples;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
 
+import com.amazonaws.AmazonClientException;
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.sns.AmazonSNS;
 import com.amazonaws.services.sns.model.PublishResult;
 import com.tdd.mocking.PackageDepartEventPublisher;
 import com.tdd.mocking.support.AmazonSNSIdentifier;
+import com.tdd.mocking.support.DepartNotificationPublishException;
 import com.tdd.mocking.support.PackageDepartEvent;
 import com.tdd.mocking.support.UnstableSNSClient;
 import org.junit.jupiter.api.Disabled;
@@ -51,6 +57,7 @@ public class StubbingExamplesTests {
   @Test
   // This test is ignored so that the build doesn't fail. Comment out/remove this @Ignore to run
   // locally.
+  @Disabled
   public void unstableDependencyExample() throws Exception {
     /** These classes are the direct dependencies that the SUT PackageDepartEventPublisher uses. */
     final AmazonSNS unstableClient = new UnstableSNSClient();
@@ -103,6 +110,7 @@ public class StubbingExamplesTests {
     PublishResult actualResult = sut.publishEvent(eventToPublish);
 
     assertNotNull(actualResult);
+    assertEquals(MESSAGE_ID, actualResult.getMessageId());
   }
 
   /**
@@ -118,7 +126,6 @@ public class StubbingExamplesTests {
   @Test
   // This test is ignored so that the build doesn't fail. Comment out/remove this @Ignore to run
   // locally.
-  @Disabled
   public void stubbingAHappyPathValueExample() throws Exception {
     final AmazonSNS snsClientTestDouble = Mockito.mock(AmazonSNS.class);
     final AmazonSNSIdentifier someSnsIdentifier = new AmazonSNSIdentifier(SUBJECT, TOPIC);
@@ -128,14 +135,14 @@ public class StubbingExamplesTests {
 
     final PublishResult publishResult = new PublishResult();
     publishResult.setMessageId(MESSAGE_ID);
-    Mockito.when(snsClientTestDouble.publish(TOPIC, EVENT_MESSAGE, SUBJECT))
+    // Mockito.when(snsClientTestDouble.publish(TOPIC, EVENT_MESSAGE, SUBJECT))
+    Mockito.when(snsClientTestDouble.publish(anyString(), anyString(), anyString()))
         .thenReturn(publishResult);
 
     final PublishResult actualResult = sut.publishEvent(eventToPublish);
 
     assertNotNull(actualResult);
-    // What should the expected result be?
-    // Hint: Look at the publish() method in PackageDepartEventPublisher.
+    assertEquals(MESSAGE_ID, actualResult.getMessageId());
   }
 
   /**
@@ -160,7 +167,6 @@ public class StubbingExamplesTests {
   @Test
   // This test is ignored so that the build doesn't fail. Comment out/remove this @Ignore to run
   // locally.
-  @Disabled
   public void publish_useStubbingToThrowAnException() throws Exception {
     final AmazonSNS snsClientTestDouble = Mockito.mock(AmazonSNS.class);
     final AmazonSNSIdentifier someSnsIdentifier = new AmazonSNSIdentifier(SUBJECT, TOPIC);
@@ -169,6 +175,10 @@ public class StubbingExamplesTests {
     final PackageDepartEvent eventToPublish = new PackageDepartEvent(EVENT_MESSAGE);
 
     /** Do your stubbing here! */
+    Mockito.when(snsClientTestDouble.publish(TOPIC, EVENT_MESSAGE, SUBJECT))
+        .thenThrow(AmazonClientException.class);
+
+    assertThrows(DepartNotificationPublishException.class, () -> sut.publishEvent(eventToPublish));
   }
 
   /**
@@ -187,9 +197,6 @@ public class StubbingExamplesTests {
    * ----------------------------------------------------------------------------------------------------------------
    */
   @Test
-  // This test is ignored so that the build doesn't fail. Comment out/remove this @Ignore to run
-  // locally.
-  @Disabled
   public void publish_stubbingMultipleValues_FailsThenSucceedsOnRetry() {
     final AmazonSNS snsClientTestDouble = Mockito.mock(AmazonSNS.class);
     final AmazonSNSIdentifier someSnsIdentifier = new AmazonSNSIdentifier(SUBJECT, TOPIC);
@@ -201,6 +208,12 @@ public class StubbingExamplesTests {
     expectedResult.setMessageId(MESSAGE_ID);
 
     /** Do your stubbing here! */
+    Mockito.when(snsClientTestDouble.publish(TOPIC, EVENT_MESSAGE, SUBJECT))
+        .thenThrow(AmazonServiceException.class)
+        .thenReturn(expectedResult);
+
+    final PublishResult actualResult = sut.publishEvent(eventToPublish);
+    assertEquals(expectedResult, actualResult);
   }
 
   /**
@@ -210,16 +223,33 @@ public class StubbingExamplesTests {
    * <p>Task: Write a unit test that uses stubbing to fail input validation.
    * ----------------------------------------------------------------------------------------------------------------
    */
-  @Test // (expected = ??.class)
-  // This test is ignored so that the build doesn't fail. Comment out/remove this @Ignore to run
-  // locally.
+  @Test
   @Disabled
   public void publish_useStubbingToMakeInputValidationFail() throws Exception {
-    /**
-     * Put all the concepts together 1. Define your test doubles. 2. Create your SUT and inject the
-     * test doubles into it. 3. Figure out which conditions would fail input validation 4. Write the
-     * test to verify the error condition/exception thrown.
+    // 1. Define your test doubles
+    final AmazonSNS snsClientTestDouble = Mockito.mock(AmazonSNS.class);
+    final AmazonSNSIdentifier someSnsIdentifier = new AmazonSNSIdentifier(SUBJECT, TOPIC);
+
+    // 2. Create your SUT and inject test doubles into it.
+    final PackageDepartEventPublisher sut =
+        new PackageDepartEventPublisher(snsClientTestDouble, someSnsIdentifier);
+
+    final PackageDepartEvent eventToPublish = new PackageDepartEvent(EVENT_MESSAGE);
+
+    /* 3. Figure out which conditions would fail input validation
+     *
+     * - empty topic, event_message, subject
+     * - topic: must be a valid `arn` string.
+     * - message:
+     *   - must be UTF-8 encoded strings at most 256 KB in size (262144 bytes).
+     * - subject:
+     *   - must be ASCII text that begins with a letter, number, or punctuation mark;
+     *   - must not include line breaks or control characters;
+     *   - and must be less than 100 characters long.
      */
+
+    // 4. Write the test to verify the error condition/except thrown
+    assertThrows(DepartNotificationPublishException.class, () -> sut.publishEvent(eventToPublish));
   }
 }
 /**

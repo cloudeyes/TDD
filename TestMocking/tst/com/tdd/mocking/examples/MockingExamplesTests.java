@@ -1,6 +1,7 @@
 package com.tdd.mocking.examples;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.sns.AmazonSNSClient;
@@ -10,7 +11,6 @@ import com.tdd.mocking.support.AmazonSNSIdentifier;
 import com.tdd.mocking.support.PackageDepartEvent;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 /**
@@ -39,7 +39,7 @@ public class MockingExamplesTests {
     mockList.add("adding some string value");
 
     /** Mockito implicitly checks that the call happened exactly 1 time. */
-    Mockito.verify(mockList, Mockito.times(1)).add(ArgumentMatchers.anyString());
+    Mockito.verify(mockList, Mockito.times(1)).add(anyString());
   }
 
   /**
@@ -63,6 +63,7 @@ public class MockingExamplesTests {
     sut.publishEvent(packageDepartEvent);
 
     /** Add mock verification here */
+    Mockito.verify(snsClientTestDouble).publish(anyString(), anyString(), anyString());
   }
 
   /**
@@ -88,24 +89,17 @@ public class MockingExamplesTests {
 
     final PublishResult expectedResult = new PublishResult();
 
-    Mockito.when(
-            snsClientTestDouble.publish(
-                ArgumentMatchers.anyString(),
-                ArgumentMatchers.anyString(),
-                ArgumentMatchers.anyString()))
+    Mockito.when(snsClientTestDouble.publish(anyString(), anyString(), anyString()))
         .thenThrow(AmazonServiceException.class)
         .thenReturn(expectedResult);
 
     final PublishResult actualResult = sut.publishEvent(packageDepartEvent);
 
     assertEquals(expectedResult, actualResult);
-    /**
-     * The code above gets us to the point we were before where we were using state verification to
-     * compare the expected and actual results. For this example though, let's go ahead and use
-     * behavior verification via a mock.
-     *
-     * <p>Add mock verification below
-     */
+
+    /** Add mock verification below */
+    Mockito.verify(snsClientTestDouble, Mockito.times(2))
+        .publish(anyString(), anyString(), anyString());
   }
 }
 /**
