@@ -1,10 +1,11 @@
 package com.tdd.testability;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class OCP {
-  public static class MenuSystem {
-    boolean isValidMenuText(String text) {
-      return text.length() < 100;
-    }
+
+  public static class OriginalMenuSystem extends MenuSystem {
 
     public void drawMenus() {
       // ... lots of code ...
@@ -43,5 +44,58 @@ public class OCP {
     private void drawPipelinesMenu(String text) {
       System.out.println(String.format("Inserting a menu item: %s", text));
     }
+  }
+
+  public static class InitialMenuSystem extends MenuSystem {
+
+    public List<MenuItem> getMenuItems() {
+      return List.of(new MenuItem("BrazilMenu"), new MenuItem("Pipeline Menu"));
+    }
+
+    public void drawMenus() {
+      for (MenuItem menuItem : this.getMenuItems()) {
+        menuItem.init();
+        if (isValidMenuText(menuItem.getMenuText())) {
+          menuItem.draw();
+        }
+      }
+    }
+  }
+
+  public static class EnhancedMenuSystem extends InitialMenuSystem {
+    List<MenuItem> _menuItems = new ArrayList<>();
+
+    public EnhancedMenuSystem(List<MenuItem> menuItems) {
+      this._menuItems.addAll(menuItems);
+    }
+
+    @Override
+    public List<MenuItem> getMenuItems() {
+      return this._menuItems;
+    }
+  }
+
+  public abstract static class MenuSystem {
+    public boolean isValidMenuText(String text) {
+      return text.length() < 99;
+    }
+
+    public abstract void drawMenus();
+  }
+
+  public static class MenuItem {
+    String _menuText;
+
+    public MenuItem(String menuText) {
+      this._menuText = menuText;
+    }
+
+    public String getMenuText() {
+      return this._menuText;
+    }
+
+    public void init() {}
+
+    public void draw() {}
   }
 }

@@ -13,22 +13,24 @@ and givenUtils_whenGetId_thenNoRealServiceCallOccurs test cases.
 */
 package com.tdd.testability;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.tdd.testability.DIP.ClientToBeFixed;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 public class DIPTest {
   @Test
   public void givenClient_whenGetId_thenIdIsPositive() throws Exception {
 
     // GIVEN
-    DIP.Client client = new DIP.Client();
+    ClientToBeFixed clientToBeFixed = new ClientToBeFixed();
 
     // WHEN
-    int clientId = client.getId();
+    int clientId = clientToBeFixed.getId();
 
     // THEN
-    assertEquals(true, clientId > 0);
+    assertTrue(clientId > 0);
   }
 
   // Given: A Client class that accepts a Service dependency
@@ -37,10 +39,14 @@ public class DIPTest {
   @Test
   public void givenInvertedClient_whenGetId_thenNoRealServiceCallsOccurs() throws Exception {
     // GIVEN
+    final DIP.Service serviceDouble = Mockito.mock(DIP.ServiceImpl.class);
+    DIP.Client client = new DIP.Client(serviceDouble);
 
     // WHEN
+    client.getId();
 
     // THEN
+    Mockito.verify(serviceDouble).getId();
   }
 
   // Given: Our static utility method, Utils.getId()
@@ -49,9 +55,12 @@ public class DIPTest {
   @Test
   public void givenUtils_whenGetId_thenNoRealServiceCallOccurs() throws Exception {
     // GIVEN
+    final DIP.Service serviceDouble = Mockito.mock(DIP.ServiceImpl.class);
 
     // WHEN
+    DIP.Utils.getId(serviceDouble);
 
     // THEN
+    Mockito.verify(serviceDouble).getId();
   }
 }

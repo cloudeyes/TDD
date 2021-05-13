@@ -1,26 +1,29 @@
 package com.tdd.testability;
 
 public class ISP {
-  static class Logger {
-    public void log(int id, String name) {
-      System.out.println(String.format("Logging for %s[%d].", name, id));
-    }
-  }
-
   interface Cache {
     int getId();
 
-    String getName();
+    public String getName();
+
+    Object get(String key);
+
+    boolean insert(String key, Object o);
+  }
+
+  public interface DistributedCache extends Cache {
 
     void evict(String key);
 
     int getTTL(String key);
 
     boolean setTTL(String key, int timeToLive);
+  }
 
-    Object get(String key);
-
-    boolean insert(String key, Object o);
+  static class Logger {
+    public void log(int id, String name) {
+      System.out.println(String.format("Logging for %s[%d].", name, id));
+    }
   }
 
   public static class LRUCache implements Cache {
@@ -43,21 +46,6 @@ public class ISP {
     }
 
     @Override
-    public void evict(String key) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public int getTTL(String key) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean setTTL(String key, int timeToLive) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
     public Object get(String key) {
       if (_logger != null) {
         _logger.log(this.getId(), this.getName());
@@ -76,7 +64,7 @@ public class ISP {
     }
   }
 
-  public static class DistributedCache implements Cache {
+  public static class DistributedCacheImpl implements DistributedCache {
     @Override
     public int getId() {
       return 2;

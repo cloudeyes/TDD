@@ -7,12 +7,15 @@ public class LSP {
     String _color;
 
     public Rectangle(int width, int height, String color) {
+      this._width = width;
+      this._height = height;
+      this.setColor(color);
+    }
+
+    public void setColor(String color) {
       if (color.equals("Pink")) {
         throw new IllegalStateException();
       }
-
-      this._width = width;
-      this._height = height;
       this._color = color;
     }
 
@@ -38,12 +41,8 @@ public class LSP {
       super(width, height, color);
     }
 
-    public void setColor(String color) {
-      this._color = color;
-    }
-
     public boolean isValid() {
-      return this._width == this._height;
+      return super.isValid() && this._width == this._height;
     }
   }
 }

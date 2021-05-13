@@ -14,6 +14,8 @@ Goal: Implement givenSquareWhichInheritsFromRectangleWithNegativeHeight_whenIsVa
 package com.tdd.testability;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
@@ -37,11 +39,11 @@ public class LSPTest {
   public void
       givenSquareWhichInheritsFromRectangleWithNegativeHeight_whenIsValid_thenReturnsFalse() {
     // GIVEN
-    LSP.Rectangle square = new LSP.Square(-10, -10, "White");
     // WHEN
+    LSP.Rectangle square = new LSP.Square(-10, -10, "White");
 
     // THEN
-    assertEquals(square.isValid(), false);
+    assertFalse(square.isValid());
   }
 
   // Given: A Square the inherits from Rectangle
@@ -51,9 +53,9 @@ public class LSPTest {
   @Test()
   public void givenSquareWhichInheritsFromRectangle_thenShouldNotBePossibeToCreatePinkSquare() {
     // GIVEN
+    LSP.Rectangle square = new LSP.Square(10, 10, "White");
 
-    // WHEN
-
-    // THEN
+    // WHEN, THEN
+    assertThrows(IllegalStateException.class, () -> square.setColor("Pink"));
   }
 }

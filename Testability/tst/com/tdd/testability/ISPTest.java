@@ -13,8 +13,11 @@ Goal: Implement givenMockCacheForWorker_whenHasData_thenWeMockTheMinimalAmountOf
 package com.tdd.testability;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
 
+import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 public class ISPTest {
 
@@ -35,10 +38,20 @@ public class ISPTest {
   // Then: We implement the minimal amount of interfaces
   @Test
   public void givenMockCacheForWorker_whenHasData_thenWeMockTheMinimalAmountOfMethods() {
-    // GIVEN
-
-    // WHEN
+    // GIVEN, WHEN
+    final ISP.LRUCache lruCacheDouble = Mockito.mock(ISP.LRUCache.class);
+    final ISP.DistributedCache distributedCacheDouble = Mockito.mock(ISP.DistributedCache.class);
+    Mockito.when(lruCacheDouble.get(anyString())).thenReturn("someCachedData");
+    Mockito.when(distributedCacheDouble.get(anyString())).thenReturn("someCachedData");
 
     // THEN
+    List.of(lruCacheDouble, distributedCacheDouble)
+        .forEach(
+            it -> {
+              final ISP.Worker worker = new ISP.Worker(it);
+              worker.hasData("someRandomKey");
+            });
+    Mockito.verify(lruCacheDouble, Mockito.times(1)).get(anyString());
+    Mockito.verify(distributedCacheDouble, Mockito.times(1)).get(anyString());
   }
 }
