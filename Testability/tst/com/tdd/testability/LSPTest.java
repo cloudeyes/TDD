@@ -13,47 +13,47 @@ Goal: Implement givenSquareWhichInheritsFromRectangleWithNegativeHeight_whenIsVa
 */
 package com.tdd.testability;
 
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class LSPTest {
-	@Test
-	public void givenSquare_whenGetArea_thenAreaIsExpected() {
-		// GIVEN
-		LSP.Square square = new LSP.Square(3, 3, "Red");
-		
-		// WHEN
-		int area = square.getArea();
-		
-		// THEN
-		assertEquals(9, area);
-	}
+import org.junit.jupiter.api.Test;
 
-	// Given: A Square that inherits from Rectangle
-	// When: We give it a negative height and/or width
-	// Then: The rectangle isValid() invariant should be upheld
-	@Test
-	public void givenSquareWhichInheritsFromRectangleWithNegativeHeight_whenIsValid_thenReturnsFalse() {
-		// GIVEN
-		LSP.Rectangle square = new LSP.Square(-10, -10, "White");
-		// WHEN
-								
-		// THEN
-		assertEquals(square.isValid(), false);
-	}
-	
-	
-	// Given: A Square the inherits from Rectangle
-	// When: We call square.setColor with "pink"
-	// Then: The Rectangle invariant "No pink objects" is upheld
-	//	@Test(expected = IllegalStateException.class)
-	@Test()
-	public void givenSquareWhichInheritsFromRectangle_thenShouldNotBePossibeToCreatePinkSquare() {
-		// GIVEN
-		
-		// WHEN
-								
-		// THEN
-	}
+public class LSPTest {
+  @Test
+  public void givenSquare_whenGetArea_thenAreaIsExpected() {
+    // GIVEN
+    LSP.Square square = new LSP.Square(3, 3, "Red");
+
+    // WHEN
+    int area = square.getArea();
+
+    // THEN
+    assertEquals(9, area);
+  }
+
+  // Given: A Square that inherits from Rectangle
+  // When: We give it a negative height and/or width
+  // Then: The rectangle isValid() invariant should be upheld
+  @Test
+  public void
+      givenSquareWhichInheritsFromRectangleWithNegativeHeight_whenIsValid_thenReturnsFalse() {
+    // GIVEN
+    LSP.Rectangle square = new LSP.Square(-10, -10, "White");
+    // WHEN
+
+    // THEN
+    assertEquals(square.isValid(), false);
+  }
+
+  // Given: A Square the inherits from Rectangle
+  // When: We call square.setColor with "pink"
+  // Then: The Rectangle invariant "No pink objects" is upheld
+  //	@Test(expected = IllegalStateException.class)
+  @Test()
+  public void givenSquareWhichInheritsFromRectangle_thenShouldNotBePossibeToCreatePinkSquare() {
+    // GIVEN
+
+    // WHEN
+
+    // THEN
+  }
 }
